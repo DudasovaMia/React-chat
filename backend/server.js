@@ -93,8 +93,8 @@ io.on("connection", (socket) => {
 
     messagesCollection
       .insertOne({
-        sender: message.logged,
-        recipient: message.selected,
+        from: message.logged,
+        to: message.selected,
         text: message.text,
         timestamp: new Date(),
       })
@@ -102,8 +102,8 @@ io.on("connection", (socket) => {
         console.log("Message inserted successfully:", result);
 
         io.emit("message", {
-          sender: message.logged,
-          recipient: message.selected,
+          from: message.logged,
+          to: message.selected,
           text: message.text,
           timestamp: new Date(),
         });
@@ -439,7 +439,7 @@ app.get("/groupmessages", async (req, res) => {
 
   try {
     const messages = await messagesCollection
-      .find({ recipient: { $regex: new RegExp(`(?:^|,)${username}(?:,|$)`) } })
+      .find({ to: { $regex: new RegExp(`(?:^|,)${username}(?:,|$)`) } })
       .toArray();
 
     res.status(200).json({ messages });
@@ -456,14 +456,14 @@ app.get("/messages", async (req, res) => {
   try {
     const messages = await messagesCollection
       .find({
-        sender: loggedId,
-        recipient: selectedId,
+        from: loggedId,
+        to: selectedId,
       })
       .toArray();
     const messages2 = await messagesCollection
       .find({
-        sender: selectedId,
-        recipient: loggedId,
+        from: selectedId,
+        to: loggedId,
       })
       .toArray();
 
