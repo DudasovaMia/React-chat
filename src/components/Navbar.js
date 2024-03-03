@@ -14,11 +14,11 @@ const Navbar = ({ theme, toggleTheme }) => {
     window.location.reload();
   };
   return (
-    <div className="flex justify-between self-center px-10 py-4">
+    <div className="flex justify-between self-center px-10 py-4 items-center">
       <h2 className="text-lg font-bold">ICQ z Wishu</h2>
-      <div className="flex">
+      <div className="flex items-center">
         {localStorage.getItem("loggedInUserUsername") ? (
-          <div>
+          <div className="flex justify-center items-center">
             {localStorage.getItem("loggedInUserUsername")}
             <button
               onClick={Logout}
@@ -28,7 +28,9 @@ const Navbar = ({ theme, toggleTheme }) => {
             </button>
           </div>
         ) : (
-          <a href="/login" className="mx-5">Login</a>
+          <a href="/login" className="mx-5">
+            Login
+          </a>
         )}
         <ToggleThemeButton theme={theme} toggleTheme={toggleTheme} />
       </div>

@@ -14,6 +14,7 @@ const ImageUploader = () => {
     const formData = new FormData();
     formData.append("image", selectedFile);
 
+
     try {
       const response = await axios.post(
         "http://localhost:4000/upload-image?from=ct&to=meno",
@@ -42,7 +43,7 @@ const ImageUploader = () => {
       ) : (
         <>
           <label
-            for="files"
+            htmlFor="files"
             className="px-2 py-1 border-2 border-gray-700 rounded-md"
           >
             Image

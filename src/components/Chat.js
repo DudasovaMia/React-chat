@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import VideoUploader from "./VideoUploader";
 import ImageUploader from "./ImageUploader";
+import UploadVoice from "./VoiceUploader";
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
@@ -100,9 +101,10 @@ const Chat = () => {
           </div>
         ))}
       </div>
-      <div className="flex w-[95%] justify-between mx-auto">
+      <div className="flex w-[95%] justify-between mx-auto my-2">
         <ImageUploader />
         <VideoUploader />
+        <UploadVoice/>
         <div className="flex w-[80%] justify-end">
           <input
             type="text"

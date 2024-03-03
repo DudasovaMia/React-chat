@@ -29,11 +29,12 @@ const LoginUserButton = () => {
 
       if (response.ok) {
         const data = await response.json();
+        localStorage.removeItem("selectedUserUsername")
         localStorage.setItem("loggedInUserToken", data.token);
         localStorage.setItem("loggedInUserUserId", data.userId);
         localStorage.setItem("loggedInUserUsername", data.username);
         console.log("Login successful.");
-        window.location.replace("/")
+        window.location.replace("/");
       } else {
         console.error("Failed to login.");
       }
@@ -43,25 +44,36 @@ const LoginUserButton = () => {
   };
 
   return (
-    <div>
-      <header>
+    <div className="flex flex-col w-[95%] h-[75vh] mx-auto justify-center items-center">
+      <div className="flex flex-col justify-center px-10 py-7 rounded-md border-2 border-gray-700">
         <input
           type="text"
           name="username"
           placeholder="Username"
           value={username}
           onChange={handleChange}
+          className="px-2 py-1 rounded-md"
         />
+        <br />
         <input
           type="password"
           name="password"
           placeholder="Password"
           value={password}
           onChange={handleChange}
+          className="px-2 py-1 rounded-md"
         />
-        <button onClick={loginUser}>Login</button>
-      </header>
-      I don't have an account <a href="/register">Register</a>
+        <br />
+        <button onClick={loginUser} className="mb-2">
+          Login
+        </button>
+        <div>
+          I don't have an account{" "}
+          <a href="/register" className="border-b-2 border-gray-700">
+            Register
+          </a>
+        </div>
+      </div>
     </div>
   );
 };

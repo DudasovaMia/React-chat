@@ -14,9 +14,13 @@ const VideoUploader = () => {
     const formData = new FormData();
     formData.append("video", selectedFile);
 
+    const sender = localStorage.getItem("loggedInUserUsername");
+    const recipient = localStorage.getItem("selectedUserUsername");
+
+
     try {
       const response = await axios.post(
-        "http://localhost:4000/upload-video?from=ct&to=meno",
+        `http://localhost:4000/upload-image?from=${sender}&to=${recipient}`,
         formData,
         {
           headers: {
@@ -41,7 +45,7 @@ const VideoUploader = () => {
         </>
       ) : (
         <>
-          <label for="videoupload" className="px-2 py-1 border-2 border-gray-700 rounded-md">Video</label>
+          <label htmlFor="videoupload" className="px-2 py-1 border-2 border-gray-700 rounded-md">Video</label>
           <input
             id="videoupload"
             style={{visibility: "hidden", display: "none"}}

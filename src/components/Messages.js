@@ -3,8 +3,7 @@ import axios from "axios"; // Import axios for making HTTP requests
 
 const MessageList = ({ loggedId, selectedId }) => {
   const [messages, setMessages] = useState([]);
-  const [usernames, setUsernames] = useState({});
-  const selectedUser = localStorage.getItem("selectedUserUsername");
+  const [reactions, setReactions] = useState([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -26,30 +25,51 @@ const MessageList = ({ loggedId, selectedId }) => {
     fetchMessages();
   }, [loggedId, selectedId]);
 
-  const fetchUsername = async (id) => {
+  useEffect(() => {
+    const fetchReactions = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/reactions");
+        setReactions(response.data.reactions);
+      } catch (error) {
+        console.error("Error fetching reactions:", error);
+      }
+    };
+
+    fetchReactions();
+    console.log(reactions);
+  }, []);
+
+  const addReaction = async (messageId, emojiCode) => {
     try {
-      const response = await fetch("http://localhost:4000/users");
-      const data = await response.json();
-      const user = data.users.find((user) => user._id === id); // Accessing data.users instead of data directly
-      const { username } = user;
-      console.log(username);
-      return username;
+      const userData = {
+        message: messageId,
+        from: localStorage.getItem("loggedInUserUsername"),
+        emoji: emojiCode,
+      };
+
+      const response = await fetch("http://localhost:4000/add-reaction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        console.log("Reaction added successfully.");
+        window.location.reload();
+        // Optionally, you can redirect the user to the login page after successful registration
+      } else {
+        console.error("Failed to add reaction.");
+      }
     } catch (error) {
-      console.error("Error fetching username:", error);
-      return null;
+      console.error("Error adding reaction:", error);
     }
   };
 
-  useEffect(() => {
-    const updateUsername = async () => {
-      const newUsername = await fetchUsername("65dcd6eb05c71e52b0460a80");
-      setUsernames((prevUsernames) => ({
-        ...prevUsernames,
-        "65dcd6eb05c71e52b0460a80": newUsername,
-      }));
-    };
-    updateUsername();
-  }, []);
+  const getReactionsForMessage = (messageId) => {
+    return reactions.filter((reaction) => reaction.message === messageId);
+  };
 
   return (
     <div className="flex flex-col">
@@ -60,18 +80,68 @@ const MessageList = ({ loggedId, selectedId }) => {
           })
           .map((message) => (
             <div
-              className="px-4 py-2 border-2 border-gray-700 my-2 rounded-md"
+              className="flex justify-between px-4 py-2 border-2 border-gray-700 my-2 rounded-md"
               key={message._id}
             >
-              <div className="text-sm">
-                {message.sender ===
-                localStorage.getItem("loggedInUserUsername") ? (
-                  <>From: me</>
-                ) : (
-                  <>From: {message.sender}</>
-                )}
+              <div className="w-fit">
+                <div className="text-sm">
+                  {message.sender ===
+                  localStorage.getItem("loggedInUserUsername") ? (
+                    <>
+                      {new Date(message.timestamp)
+                        .toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })
+                        .replace(",", "")}
+                      {"  "}
+                      From: me{" "}
+                    </>
+                  ) : (
+                    <>
+                      {new Date(message.timestamp)
+                        .toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })
+                        .replace(",", "")}
+                      {"  "}From: {message.sender}
+                    </>
+                  )}
+                </div>
+                <strong> {message.text}</strong>
               </div>
-              <strong> {message.text}</strong>
+              <div className="w-fit">
+                {!getReactionsForMessage(message._id).some(
+                  (reaction) =>
+                    reaction.from ===
+                    localStorage.getItem("loggedInUserUsername")
+                ) && (
+                  <select
+                    onChange={(e) => addReaction(message._id, e.target.value)}
+                  >
+                    <option style={{ display: "inline" }}>&#128522;</option>
+                    <option style={{ display: "inline" }}>&#128077;</option>
+                    <option style={{ display: "inline" }}>&#127881;</option>
+                    <option style={{ display: "inline" }}>&#128525;</option>
+                    <option style={{ display: "inline" }}>&#128640;</option>
+                  </select>
+                )}
+
+                {getReactionsForMessage(message._id).map((reaction) => (
+                  <div key={reaction._id} style={{ display: "inline" }}>
+                    {reaction.emoji} by me
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
       </div>

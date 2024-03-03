@@ -5,6 +5,12 @@ const UserSelect = ({ onSelect, currentUserId }) => {
   const [selectedUser, setSelectedUser] = useState("");
 
   useEffect(() => {
+    if (!localStorage.getItem("loggedInUserUsername")) {
+      window.location.replace("/login");
+    }
+  });
+
+  useEffect(() => {
     fetchUsers();
   }, []);
 
@@ -27,6 +33,11 @@ const UserSelect = ({ onSelect, currentUserId }) => {
   };
 
   const handleChange = (username) => {
+    if (localStorage.getItem("selectedUserUsername") === username) {
+      localStorage.removeItem("selectedUserUsername");
+      window.location.reload();
+      return;
+    }
     setSelectedUser(username);
     localStorage.setItem("selectedUserUsername", username);
     window.location.reload();
@@ -35,13 +46,22 @@ const UserSelect = ({ onSelect, currentUserId }) => {
   return (
     <div className="w-[25%] flex flex-col px-2 py-1">
       {users.map((user) => (
-        <div
-          key={user.id}
-          className="flex w-[100%] border-2 border-gray-700 px-2 py-1 justify-between"
-          onClick={() => handleChange(user.username)}
-        >
-          <div>{user.username}</div>
-          <div>{">"}</div>
+        <div key={user._id}>
+          {" "}
+          {user.username !== localStorage.getItem("loggedInUserUsername") && (
+            <div
+              className="flex w-[100%] border-2 border-gray-700 px-2 py-1 justify-between"
+              onClick={() => handleChange(user.username)}
+            >
+              <div>{user.username}</div>
+              {user.username ===
+              localStorage.getItem("selectedUserUsername") ? (
+                <div>{"<"}</div>
+              ) : (
+                <div>{">"}</div>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>
