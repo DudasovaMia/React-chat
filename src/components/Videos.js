@@ -30,7 +30,22 @@ const Videos = ({ loggedId, selectedId }) => {
             return new Date(a.timestamp) - new Date(b.timestamp);
           })
           .map((video, i) => (
-            <div key={i} style={{width: "calc(100% / 4)"}} className="border-2 border-gray-700 rounded-md mx-2 my-1">
+            <div
+              key={i}
+              style={{ width: "calc(100% / 4)" }}
+              className="border-2 border-gray-700 rounded-md mx-2 my-1"
+            >
+              {new Date(video.timestamp)
+                .toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+                .replace(",", "")}{"  "}
+                {video.from == localStorage.getItem("loggedInUserUsername") ? "by me" : video.from}
               <video width="500px" controls="controls">
                 <source
                   src={"http://localhost:4000/uploads/video/" + video.filename}

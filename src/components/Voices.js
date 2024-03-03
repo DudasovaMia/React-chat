@@ -48,9 +48,22 @@ const Voices = () => {
           .map((voice, i) => (
             <div
               key={i}
-              style={{ width: "calc(100% / 4.5)" }}
-              className="border-2 border-gray-700 rounded-md mx-2 my-1"
+              className="w-fit border-2 border-gray-700 rounded-md mx-2 my-1"
             >
+              {new Date(voice.timestamp)
+                .toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })
+                .replace(",", "")}
+              {"  "}
+              {voice.from == localStorage.getItem("loggedInUserUsername")
+                ? "by me"
+                : voice.from}
               <audio controls>
                 <source
                   src={"http://localhost:4000/uploads/voice/" + voice.filename}
