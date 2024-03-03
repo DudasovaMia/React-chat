@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const app = express();
-app.use("/uploads", express.static("uploads"))
+app.use("/uploads", express.static("uploads"));
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
@@ -26,13 +26,19 @@ const dbName = "chat";
 const collectionName = "messages";
 const usersCollectionName = "users";
 const videosCollectionName = "videos";
-const imagesCollectionName = "images"
+const imagesCollectionName = "images";
+const reactionsCollectionName = "reactions";
+const voiceCollectionName = "voice";
+const profileCollectionName = "profile"
 
 let db;
 let messagesCollection;
 let usersCollection;
 let videosCollection;
 let imagesCollection;
+let reactionsCollection;
+let voiceCollection;
+let profileCollection
 
 MongoClient.connect(mongoURI, { useUnifiedTopology: true })
   .then((client) => {
@@ -41,7 +47,10 @@ MongoClient.connect(mongoURI, { useUnifiedTopology: true })
     messagesCollection = db.collection(collectionName);
     usersCollection = db.collection(usersCollectionName); // Initialize usersCollection
     videosCollection = db.collection(videosCollectionName); // Initialize usersCollection
-    imagesCollection = db.collection(imagesCollectionName)
+    imagesCollection = db.collection(imagesCollectionName);
+    reactionsCollection = db.collection(reactionsCollectionName);
+    voiceCollection = db.collection(voiceCollectionName);
+    profileCollection = db.collection(profileCollectionName)
   })
   .catch((err) => {
     console.error("Error connecting to MongoDB:", err);
@@ -118,14 +127,76 @@ io.on("connection", (socket) => {
 const multer = require("multer");
 const fs = require("fs");
 const upload = multer({ dest: "uploads/" }); // Destination folder for uploaded files
-const imageUpload = multer({dest: "uploads/images/"})
+const imageUpload = multer({ dest: "uploads/images/" });
+const voiceUpload = multer({ dest: "uploads/voice/" });
+const profileUpload = multer({dest: "uploads/profile/"})
+
+app.post("/upload-profile", profileUpload.single("profile"), async (req, res) => {
+  try {
+    const {user} = req.body
+    const { originalname: filename, path: filePath } = req.file;
+
+    const newPath = `uploads/profile/${filename}`;
+
+    fs.rename(filePath, newPath, (err) => {
+      if (err) {
+        console.error("Error moving file:", err);
+        return res.status(500).send("Error uploading profile.");
+      }
+      console.log("File moved successfully.");
+      res.status(200).send("profile uploaded successfully.");
+    });
+
+    const profileUpload = await profileCollection.insertOne({
+      user: user,
+      filename: filename,
+    });
+  } catch (error) {
+    console.error("Error uploading profile:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+app.post("/upload-voice", voiceUpload.single("voice"), async (req, res) => {
+  try {
+    const { from, to } = req.body;
+    const { originalname: filename, path: filePath } = req.file; // Use original filename
+
+    console.log(from, to, filename);
+
+    // Provide the correct paths for renaming
+    const newPath = `uploads/voice/${filename}`;
+
+    fs.rename(filePath, newPath, (err) => {
+      if (err) {
+        console.error("Error moving file:", err);
+        return res.status(500).send("Error uploading voice.");
+      }
+      console.log("File moved successfully.");
+      // Send response after the file is successfully moved
+      res.status(200).send("Voice uploaded successfully.");
+    });
+
+    // Insert the uploaded voice details into the database
+    const voiceUpload = await voiceCollection.insertOne({
+      from: from,
+      to: to,
+      filename: filename,
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    console.error("Error uploading voice:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 
 app.post("/upload-video", upload.single("video"), async (req, res) => {
   // Access the uploaded file via req.file
   const videoFile = req.file;
   const from = req.query.from;
   const to = req.query.to;
-  const timestamp = new Date()
+  const timestamp = new Date();
 
   // Example: move the file to a different location
   fs.rename(videoFile.path, `uploads/${videoFile.originalname}`, (err) => {
@@ -136,19 +207,28 @@ app.post("/upload-video", upload.single("video"), async (req, res) => {
     res.status(200).send("Video uploaded successfully.");
   });
 
-  const videoUpload = await videosCollection.insertOne({from: from, to: to, filename: videoFile.originalname, timestamp: timestamp});
+  const videoUpload = await videosCollection.insertOne({
+    from: from,
+    to: to,
+    filename: videoFile.originalname,
+    timestamp: timestamp,
+  });
 });
 
 app.post("/getvideos", async (req, res) => {
   const from = req.query.from;
   const to = req.query.to;
-  console.log(from,to)
+  console.log(from, to);
 
   try {
-    const videosfrom = await videosCollection.find({ from: from, to: to }).toArray();
-    const videosto = await videosCollection.find({ from: to, to: from }).toArray();
+    const videosfrom = await videosCollection
+      .find({ from: from, to: to })
+      .toArray();
+    const videosto = await videosCollection
+      .find({ from: to, to: from })
+      .toArray();
 
-    res.status(200).json({ videos:  [...videosfrom, ...videosto] }); // Assuming user._id is the user ID
+    res.status(200).json({ videos: [...videosfrom, ...videosto] }); // Assuming user._id is the user ID
   } catch (error) {
     console.error("Error getting videos:", error);
     res.status(500).json({ message: "Internal server error." });
@@ -163,13 +243,17 @@ app.post("/upload-image", imageUpload.single("image"), async (req, res) => {
   const timestamp = new Date();
 
   // Example: move the file to a different location
-  fs.rename(imageFile.path, `uploads/images/${imageFile.originalname}`, (err) => {
-    if (err) {
-      console.error("Error moving file:", err);
-      return res.status(500).send("Error uploading image.");
+  fs.rename(
+    imageFile.path,
+    `uploads/images/${imageFile.originalname}`,
+    (err) => {
+      if (err) {
+        console.error("Error moving file:", err);
+        return res.status(500).send("Error uploading image.");
+      }
+      res.status(200).send("Image uploaded successfully.");
     }
-    res.status(200).send("Image uploaded successfully.");
-  });
+  );
 
   const imageUpload = await imagesCollection.insertOne({
     from: from,
@@ -199,13 +283,37 @@ app.post("/getimages", async (req, res) => {
   }
 });
 
+// Endpoint to update user bio
+app.post("/update-bio", async (req, res) => {
+  try {
+    const { username, bio } = req.body;
+
+    // Check if the user exists
+    const existingUser = await usersCollection.findOne({ username });
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Update the user's bio
+    await usersCollection.updateOne(
+      { username },
+      { $set: { bio } }
+    );
+
+    res.status(200).json({ message: "Bio updated successfully." });
+  } catch (error) {
+    console.error("Error updating user bio:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
+  if (!username || !password ) {
     return res
       .status(400)
-      .json({ message: "Username and password are required." });
+      .json({ message: "Username, password are required." });
   }
 
   try {
@@ -221,6 +329,7 @@ app.post("/register", async (req, res) => {
     const userData = {
       username,
       password: hashedPassword,
+      // bio,
     };
 
     const result = await usersCollection.insertOne(userData);
@@ -234,6 +343,29 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 });
+
+app.post("/add-reaction", async (req, res) => {
+  const { message, from, emoji } = req.body;
+
+  try {
+    const userData = {
+      message,
+      from,
+      emoji,
+    };
+
+    const result = await reactionsCollection.insertOne(userData);
+    console.log(
+      `Inserted ${result.insertedCount} document into the users collection.`
+    );
+
+    res.status(201).json({ message: "Reaction added successfully." });
+  } catch (error) {
+    console.error("Error adding reaction:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -281,6 +413,29 @@ app.get("/users", async (req, res) => {
   }
 });
 
+app.get("/reactions", async (req, res) => {
+  try {
+    // Retrieve users from the database
+    const reactions = await reactionsCollection.find({}).toArray();
+    // Send the users as a JSON response
+    res.status(200).json({ reactions });
+  } catch (error) {
+    // Handle errors
+    console.error("Error fetching reactions:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const profile = await profileCollection.find({}).toArray();
+    res.status(200).json({ profile });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 app.get("/messages", async (req, res) => {
   const { loggedId, selectedId } = req.query;
 
@@ -299,7 +454,7 @@ app.get("/messages", async (req, res) => {
       })
       .toArray();
 
-    res.status(200).json({ messages: [...messages,...messages2] });
+    res.status(200).json({ messages: [...messages, ...messages2] });
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).json({ message: "Internal server error." });
