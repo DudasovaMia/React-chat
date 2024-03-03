@@ -33,7 +33,7 @@ const LoginUserButton = () => {
         localStorage.setItem("loggedInUserUserId", data.userId);
         localStorage.setItem("loggedInUserUsername", data.username);
         console.log("Login successful.");
-        window.location.reload();
+        window.location.replace("/")
       } else {
         console.error("Failed to login.");
       }
@@ -61,6 +61,7 @@ const LoginUserButton = () => {
         />
         <button onClick={loginUser}>Login</button>
       </header>
+      I don't have an account <a href="/register">Register</a>
     </div>
   );
 };

@@ -9,8 +9,8 @@ const MessageList = ({ loggedId, selectedId }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const loggedId = localStorage.getItem("loggedInUserUserId");
-        const selectedId = localStorage.getItem("selectedUserUserId");
+        const loggedId = localStorage.getItem("loggedInUserUsername");
+        const selectedId = localStorage.getItem("selectedUserUsername");
         const response = await axios.get("http://localhost:4000/messages", {
           params: {
             loggedId: loggedId,
@@ -52,16 +52,29 @@ const MessageList = ({ loggedId, selectedId }) => {
   }, []);
 
   return (
-    <div>
-      <h2>Messages: {selectedUser}</h2>
-      <ul>
-        {messages.map((message) => (
-          <li key={message._id}>
-            <strong>Sender:</strong> {usernames[message.sender]}
-            <strong>Message:</strong> {message.text}
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col">
+      <div className="flex flex-col w-[95%] justify-center mx-auto">
+        {messages
+          .sort(function (a, b) {
+            return new Date(a.timestamp) - new Date(b.timestamp);
+          })
+          .map((message) => (
+            <div
+              className="px-4 py-2 border-2 border-gray-700 my-2 rounded-md"
+              key={message._id}
+            >
+              <div className="text-sm">
+                {message.sender ===
+                localStorage.getItem("loggedInUserUsername") ? (
+                  <>From: me</>
+                ) : (
+                  <>From: {message.sender}</>
+                )}
+              </div>
+              <strong> {message.text}</strong>
+            </div>
+          ))}
+      </div>
     </div>
   );
 };

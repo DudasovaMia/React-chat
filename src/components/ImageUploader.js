@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const VideoUploader = () => {
+const ImageUploader = () => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -12,11 +12,11 @@ const VideoUploader = () => {
     if (!selectedFile) return;
 
     const formData = new FormData();
-    formData.append("video", selectedFile);
+    formData.append("image", selectedFile);
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/upload-video?from=ct&to=meno",
+        "http://localhost:4000/upload-image?from=ct&to=meno",
         formData,
         {
           headers: {
@@ -24,10 +24,10 @@ const VideoUploader = () => {
           },
         }
       );
-      console.log("Video uploaded successfully:", response.data);
+      console.log("Image uploaded successfully:", response.data);
       window.location.reload();
     } catch (error) {
-      console.error("Error uploading video:", error);
+      console.error("Error uploading image:", error);
     }
   };
 
@@ -41,10 +41,15 @@ const VideoUploader = () => {
         </>
       ) : (
         <>
-          <label for="videoupload" className="px-2 py-1 border-2 border-gray-700 rounded-md">Video</label>
+          <label
+            for="files"
+            className="px-2 py-1 border-2 border-gray-700 rounded-md"
+          >
+            Image
+          </label>
           <input
-            id="videoupload"
-            style={{visibility: "hidden", display: "none"}}
+            id="files"
+            style={{ visibility: "hidden", display: "none" }}
             type="file"
             onChange={handleFileChange}
           ></input>
@@ -54,4 +59,4 @@ const VideoUploader = () => {
   );
 };
 
-export default VideoUploader;
+export default ImageUploader;

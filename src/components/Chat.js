@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
+import VideoUploader from "./VideoUploader";
+import ImageUploader from "./ImageUploader";
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [username, setUsername] = useState(""); // State to hold the username
+
+  useEffect(() => {
+    if (!localStorage.getItem("loggedInUserUsername")) {
+      window.location.replace("/login");
+    }
+  });
 
   useEffect(() => {
     const newSocket = io("http://localhost:4000"); // Replace with your server URL
@@ -50,8 +58,8 @@ const Chat = () => {
   }, []);
 
   const sendMessage = () => {
-    const logged = localStorage.getItem("loggedInUserUserId");
-    const selected = localStorage.getItem("selectedUserUserId");
+    const logged = localStorage.getItem("loggedInUserUsername");
+    const selected = localStorage.getItem("selectedUserUsername");
     if (!inputMessage.trim() || !username) return;
 
     if (logged && selected && inputMessage) {
@@ -83,7 +91,7 @@ const Chat = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col">
       <div>
         {messages.map((message, index) => (
           <div key={index}>
@@ -92,14 +100,19 @@ const Chat = () => {
           </div>
         ))}
       </div>
-      <div>
-        <input
-          type="text"
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Type a message..."
-        />
-        <button onClick={sendMessage}>Send</button>
+      <div className="flex w-[95%] justify-between mx-auto">
+        <ImageUploader />
+        <VideoUploader />
+        <div className="flex w-[80%] justify-end">
+          <input
+            type="text"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="w-[80%]"
+          />
+          <button onClick={sendMessage} className="ml-1">Send</button>
+        </div>
       </div>
     </div>
   );

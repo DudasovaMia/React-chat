@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Default styles */
 .App {
   font-family: Arial, sans-serif;
@@ -12,6 +16,12 @@
 .App.dark .content {
   background-color: #333; /* Dark background color */
   color: #fff; /* Dark text color */
+}
+
+button {
+  padding: 0.25rem 0.5rem;
+  border: 2px solid rgba(55, 65, 81);
+  border-radius: 10px;
 }
 
 /* Additional styles for specific elements can be added here */

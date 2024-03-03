@@ -56,6 +56,7 @@ class RegisterUserForm extends React.Component {
           />
           <button onClick={this.registerUser}>Register</button>
         </header>
+        I already have an account <a href="/login">Login</a>
       </div>
     );
   }

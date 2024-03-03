@@ -6,14 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import ChatRoom from "./components/ChatRoom";
-
-function ToggleThemeButton({ theme, toggleTheme }) {
-  return (
-    <button onClick={toggleTheme}>
-      {theme === "light" ? "Switch to Dark Theme" : "Switch to Light Theme"}
-    </button>
-  );
-}
+import Navbar from "./components/Navbar";
 
 const root = createRoot(document.getElementById("root"));
 
@@ -28,8 +21,8 @@ function App() {
     <React.StrictMode>
       <Router>
         <div className={`App ${theme}`}>
-          <ToggleThemeButton theme={theme} toggleTheme={toggleTheme} />
-          <div className="content">
+          <div className="content  min-h-[100vh]">
+            <Navbar theme={theme} toggleTheme={toggleTheme} />
             <Routes>
               <Route path="/" element={<ChatRoom />} />
               <Route path="/login" element={<Login />} />

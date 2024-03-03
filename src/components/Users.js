@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 const UserSelect = ({ onSelect, currentUserId }) => {
-
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
 
@@ -27,25 +26,25 @@ const UserSelect = ({ onSelect, currentUserId }) => {
     }
   };
 
-  const handleChange = (event) => {
-    setSelectedUser(event.target.value);
-    const selectedUserData = users.find(
-      (user) => user._id === event.target.value
-    );
-    localStorage.setItem("selectedUserUserId", selectedUserData._id)
-    localStorage.setItem("selectedUserUsername", selectedUserData.username)
-    window.location.reload()
+  const handleChange = (username) => {
+    setSelectedUser(username);
+    localStorage.setItem("selectedUserUsername", username);
+    window.location.reload();
   };
 
   return (
-    <select value={selectedUser} onChange={handleChange}>
-      <option value="">Select User</option>
+    <div className="w-[25%] flex flex-col px-2 py-1">
       {users.map((user) => (
-        <option key={user._id} value={user._id}>
-          {user.username} ({user._id})
-        </option>
+        <div
+          key={user.id}
+          className="flex w-[100%] border-2 border-gray-700 px-2 py-1 justify-between"
+          onClick={() => handleChange(user.username)}
+        >
+          <div>{user.username}</div>
+          <div>{">"}</div>
+        </div>
       ))}
-    </select>
+    </div>
   );
 };
 
