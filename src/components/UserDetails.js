@@ -129,7 +129,7 @@ const UserDetails = () => {
                   <input
                     id="profileUpload"
                     type="file"
-                    accept="png"
+                    accept="image/*"
                     onChange={handleFileChange}
                     style={{ visibility: "hidden", display: "none" }}
                   />

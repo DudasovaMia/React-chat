@@ -1,42 +1,115 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios for making HTTP requests
 
-const MessageList = ({ loggedId, selectedId }) => {
-  const [messages, setMessages] = useState([]);
+const MessageList = () => {
   const [reactions, setReactions] = useState([]);
+  const [allMessages, setAllMessages] = useState([]);
+  const [loading, setLoading] = useState();
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const loggedId = localStorage.getItem("loggedInUserUsername");
-        const selectedId = localStorage.getItem("selectedUserUsername");
-        const response = await axios.get("http://localhost:4000/messages", {
-          params: {
-            loggedId: loggedId,
-            selectedId: selectedId,
-          },
+  const fetchMessages = async () => {
+    try {
+      const loggedId = localStorage.getItem("loggedInUserUsername");
+      const selectedId = localStorage.getItem("selectedUserUsername");
+      const response = await axios.get("http://localhost:4000/messages", {
+        params: {
+          loggedId: loggedId,
+          selectedId: selectedId,
+        },
+      });
+      setAllMessages((prevMessages) => {
+        // Filter out messages that already exist in allMessages
+        const newMessages = response.data.messages.filter(
+          (message) => !prevMessages.some((m) => m._id === message._id)
+        );
+        return [...prevMessages, ...newMessages];
+      });
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const fetchVideos = async () => {
+    try {
+      const to = localStorage.getItem("loggedInUserUsername");
+      const from = localStorage.getItem("selectedUserUsername");
+      const response = await axios.post(
+        "http://localhost:4000/getvideos?from=" + from + "&to=" + to
+      );
+      setAllMessages((prevMessages) => {
+        // Filter out messages that already exist in allMessages
+        const newVideos = response.data.videos.filter(
+          (video) => !prevMessages.some((m) => m._id === video._id)
+        );
+        return [...prevMessages, ...newVideos];
+      });
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    }
+  };
+
+  const fetchVoices = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/voices");
+      if (response.ok) {
+        const data = await response.json();
+        const filteredVoices = data.voices.filter(
+          (voice) =>
+            (voice.from === localStorage.getItem("loggedInUserUsername") &&
+              voice.to === localStorage.getItem("selectedUserUsername")) ||
+            (voice.from === localStorage.getItem("selectedUserUsername") &&
+              voice.to === localStorage.getItem("loggedInUserUsername"))
+        );
+        setAllMessages((prevMessages) => {
+          // Filter out messages that already exist in allMessages
+          const newVoices = filteredVoices.filter(
+            (voice) => !prevMessages.some((m) => m._id === voice._id)
+          );
+          return [...prevMessages, ...newVoices];
         });
-        setMessages(response.data.messages);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
+      } else {
+        console.error("Failed to fetch voices");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching voices:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchMessages();
-  }, [loggedId, selectedId]);
+  const fetchImages = async () => {
+    try {
+      const to = localStorage.getItem("loggedInUserUsername");
+      const from = localStorage.getItem("selectedUserUsername");
+      const response = await axios.post(
+        "http://localhost:4000/getimages?from=" + from + "&to=" + to
+      );
+      setAllMessages((prevMessages) => {
+        // Filter out messages that already exist in allMessages
+        const newImages = response.data.images.filter(
+          (image) => !prevMessages.some((m) => m._id === image._id)
+        );
+        return [...prevMessages, ...newImages];
+      });
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  };
+
+  const fetchReactions = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/reactions");
+      setReactions(response.data.reactions);
+    } catch (error) {
+      console.error("Error fetching reactions:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchReactions = async () => {
-      try {
-        const response = await axios.get("http://localhost:4000/reactions");
-        setReactions(response.data.reactions);
-      } catch (error) {
-        console.error("Error fetching reactions:", error);
-      }
-    };
-
+    fetchMessages();
     fetchReactions();
-    console.log(reactions);
+    fetchVideos();
+    fetchVoices();
+    fetchImages();
   }, []);
 
   const addReaction = async (messageId, emojiCode) => {
@@ -71,9 +144,9 @@ const MessageList = ({ loggedId, selectedId }) => {
   };
 
   return (
-    <div className="flex flex-col h-[70vh] max-h-[70vh] overflow-y-auto overflow-x-hidden py-1">
+    <div className="flex flex-col h-[60vh] max-h-[60vh] overflow-y-auto overflow-x-hidden py-1">
       <div className="flex flex-col w-[95%] justify-center mx-auto">
-        {messages
+        {allMessages
           .sort(function (a, b) {
             return new Date(a.timestamp) - new Date(b.timestamp);
           })
@@ -84,7 +157,7 @@ const MessageList = ({ loggedId, selectedId }) => {
             >
               <div className="w-fit">
                 <div className="text-sm">
-                  {message.sender ===
+                  {message.from ==
                   localStorage.getItem("loggedInUserUsername") ? (
                     <>
                       {new Date(message.timestamp)
@@ -112,11 +185,40 @@ const MessageList = ({ loggedId, selectedId }) => {
                           hour12: false,
                         })
                         .replace(",", "")}
-                      {"  "}From: {message.sender}
+                      {"  "}From: {message.from}
                     </>
                   )}
                 </div>
-                <strong> {message.text}</strong>
+                {message.text && <strong>{message.text}</strong>}
+                {message.filename && message.filename.endsWith(".mp4") && (
+                  <video
+                    src={
+                      "http://localhost:4000/uploads/video/" + message.filename
+                    }
+                    className="max-h-[25vh]"
+                    controls
+                  />
+                )}
+                {message.filename &&
+                  /\.(jpg|jpeg|png|gif|bmp|svg|webp)$/i.test(message.filename) && (
+                    <img
+                      src={
+                        "http://localhost:4000/uploads/images/" +
+                        message.filename
+                      }
+                      alt="Image"
+                      className="max-h-[25vh]"
+                    />
+                  )}
+                {message.filename && message.filename.endsWith(".mp3") && (
+                  <audio
+                    src={
+                      "http://localhost:4000/uploads/voice/" + message.filename
+                    }
+                    controls
+                    className="max-h-[25vh]"
+                  />
+                )}
               </div>
               <div className="w-fit">
                 {!getReactionsForMessage(message._id).some(

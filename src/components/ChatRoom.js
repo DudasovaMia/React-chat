@@ -11,6 +11,31 @@ import Voices from "./Voices";
 function MessageRoom() {
   const [mediaOpened, setMediaOpened] = useState(false);
   const [mediaType, setMediaType] = useState("videos");
+  const [pfp, setPFP] = useState();
+  const [loading, setLoading] = useState()
+
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      try {
+        const response = await fetch("http://localhost:4000/profile");
+        if (response.ok) {
+          const data = await response.json();
+          const loggedInUsername = localStorage.getItem("selectedUserUsername");
+          const profilePicture = data.profile.find(
+            (user) => user.user === loggedInUsername
+          );
+          setPFP(profilePicture ? profilePicture.filename : null);
+        } else {
+          console.error("Failed to fetch profile pictures");
+        }
+      } catch (error) {
+        console.error("Error fetching profile pictures:", error);
+      } finally {
+        setLoading(false); // Set loading to false regardless of success or failure
+      }
+    };
+    fetchProfilePicture();
+  }, []);
 
   return (
     <div className="flex">
@@ -21,7 +46,11 @@ function MessageRoom() {
             <div className="w-[100%]">
               <div className="flex items-center border-b-2 border-gray-700 justify-between w-[95%] mx-auto">
                 <h2>
-                  Messages:{" "}
+                  <img
+                    src={
+                      "http://localhost:4000/uploads/profile/" + pfp
+                    }
+                  />
                   <strong>
                     {localStorage.getItem("selectedUserUsername")}
                   </strong>
@@ -33,9 +62,12 @@ function MessageRoom() {
                   >
                     Chat
                   </button>
-                  <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
-                    Media
-                  </p>
+                  {localStorage.getItem("selectedUserUsername").split(",")
+                    .length === 1 && (
+                    <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
+                      Media
+                    </p>
+                  )}
                 </div>
               </div>
               {mediaType === "images" && (
@@ -108,23 +140,31 @@ function MessageRoom() {
           ) : (
             <div className="w-[100%]">
               <div className="flex items-center border-b-2 border-gray-700 justify-between w-[95%] mx-auto">
-                <h2>
-                  Messages:{" "}
+                <h2 className="my-3 flex items-center space-x-2">
+                  <img
+                    src={
+                      "http://localhost:4000/uploads/profile/" + pfp
+                    }
+                    className="w-[50px] aspect-square rounded-full border-2 border-gray-700 p-1"
+                  />
                   <strong>
                     {localStorage.getItem("selectedUserUsername")}
                   </strong>
                 </h2>
-                <div className="flex items-center">
-                  <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
-                    Chat
-                  </p>
-                  <button
-                    onClick={() => setMediaOpened(true)}
-                    className="mx-5 my-2"
-                  >
-                    Media
-                  </button>
-                </div>
+                {localStorage.getItem("selectedUserUsername").split(",")
+                  .length === 1 && (
+                  <div className="flex items-center">
+                    <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
+                      Chat
+                    </p>
+                    <button
+                      onClick={() => setMediaOpened(true)}
+                      className="mx-5 my-2"
+                    >
+                      Media
+                    </button>
+                  </div>
+                )}
               </div>
               <MessageList />
               <ChatComponent />

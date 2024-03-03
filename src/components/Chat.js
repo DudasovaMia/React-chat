@@ -98,9 +98,14 @@ const Chat = () => {
         ))}
       </div>
       <div className="flex w-[95%] justify-between mx-auto my-2">
-        <ImageUploader />
-        <VideoUploader />
-        <UploadVoice />
+        {localStorage.getItem("selectedUserUsername").split(",").length ===
+          1 && (
+          <>
+            <ImageUploader />
+            <VideoUploader />
+            <UploadVoice />
+          </>
+        )}
         <div className="flex w-[80%] justify-end">
           <input
             type="text"

@@ -45,7 +45,7 @@ const UserSelect = ({ onSelect, currentUserId }) => {
         const data = await response.json();
         const uniqueGroups = new Set(); // Initialize a Set to store unique group names
         data.messages.forEach((message) => {
-          uniqueGroups.add(message.recipient); // Add each group name to the Set
+          uniqueGroups.add(message.to); // Add each group name to the Set
         });
         setGroupMessages(uniqueGroups); // Set the state with unique group names
       } else {

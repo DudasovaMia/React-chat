@@ -17,6 +17,8 @@ function App() {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
+  console.log("Hello there")
+
   return (
     <React.StrictMode>
       <Router>
