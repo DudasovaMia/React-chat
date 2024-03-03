@@ -9,26 +9,19 @@ const VideoUploader = () => {
   };
 
   const uploadFile = async () => {
-    if (!selectedFile) return;
-
-    const formData = new FormData();
-    formData.append("video", selectedFile);
-
-    const sender = localStorage.getItem("loggedInUserUsername");
-    const recipient = localStorage.getItem("selectedUserUsername");
-
-
     try {
-      const response = await axios.post(
-        `http://localhost:4000/upload-image?from=${sender}&to=${recipient}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Video uploaded successfully:", response.data);
+      const formData = new FormData();
+      formData.append("video", selectedFile);
+      formData.append("from", localStorage.getItem("loggedInUserUsername"));
+      formData.append("to", localStorage.getItem("selectedUserUsername"));
+
+      await axios.post("http://localhost:4000/upload-video", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Video uploaded successfully.");
       window.location.reload();
     } catch (error) {
       console.error("Error uploading video:", error);

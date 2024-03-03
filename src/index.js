@@ -21,7 +21,7 @@ function App() {
     <React.StrictMode>
       <Router>
         <div className={`App ${theme}`}>
-          <div className="content  min-h-[100vh]">
+          <div className="content  h-[100vh] max-w-[100%] overflow-hidden">
             <Navbar theme={theme} toggleTheme={toggleTheme} />
             <Routes>
               <Route path="/" element={<ChatRoom />} />

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
 const LoginUserButton = () => {
-  const [username, setUsername] = useState(""); // Initialize username state
-  const [password, setPassword] = useState(""); // Initialize password state
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleChange = (event) => {
     if (event.target.name === "username") {

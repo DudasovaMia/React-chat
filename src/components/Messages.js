@@ -58,7 +58,6 @@ const MessageList = ({ loggedId, selectedId }) => {
       if (response.ok) {
         console.log("Reaction added successfully.");
         window.location.reload();
-        // Optionally, you can redirect the user to the login page after successful registration
       } else {
         console.error("Failed to add reaction.");
       }
@@ -72,7 +71,7 @@ const MessageList = ({ loggedId, selectedId }) => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-[70vh] max-h-[70vh] overflow-y-auto overflow-x-hidden py-1">
       <div className="flex flex-col w-[95%] justify-center mx-auto">
         {messages
           .sort(function (a, b) {
@@ -138,7 +137,7 @@ const MessageList = ({ loggedId, selectedId }) => {
 
                 {getReactionsForMessage(message._id).map((reaction) => (
                   <div key={reaction._id} style={{ display: "inline" }}>
-                    {reaction.emoji} by me
+                    {reaction.emoji}
                   </div>
                 ))}
               </div>

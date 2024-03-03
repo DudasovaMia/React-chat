@@ -91,12 +91,17 @@ const UserDetails = () => {
     }
   };
 
-  // Render loading message while waiting for data
+  const Logout = () => {
+    localStorage.removeItem("loggedInUserUsername");
+    localStorage.removeItem("loggedInUserUserId");
+    localStorage.removeItem("loggedInUserToken");
+    window.location.reload();
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  // Render user details if data is available
   return (
     <div className="flex flex-col w-[75%] border-2 px-2 py-1 border-gray-700 mr-2 my-1">
       {users && (
@@ -150,6 +155,12 @@ const UserDetails = () => {
                 <button onClick={() => updateBio()}>Update Bio</button>
               </div>
             )}
+            <button
+              onClick={Logout}
+              className="mt-2 px-2 py-1 border-gray-700 border-2 rounded-md"
+            >
+              Logout
+            </button>
           </div>
         </div>
       )}

@@ -30,10 +30,10 @@ const Videos = ({ loggedId, selectedId }) => {
             return new Date(a.timestamp) - new Date(b.timestamp);
           })
           .map((video, i) => (
-            <div key={i} style={{width: "calc(100% / 4.5)"}} className="border-2 border-gray-700 rounded-md mx-2 my-1">
+            <div key={i} style={{width: "calc(100% / 4)"}} className="border-2 border-gray-700 rounded-md mx-2 my-1">
               <video width="500px" controls="controls">
                 <source
-                  src={"http://localhost:4000/uploads/" + video.filename}
+                  src={"http://localhost:4000/uploads/video/" + video.filename}
                   type="video/mp4"
                 />
               </video>{" "}

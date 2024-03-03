@@ -9,23 +9,19 @@ const ImageUploader = () => {
   };
 
   const uploadFile = async () => {
-    if (!selectedFile) return;
-
-    const formData = new FormData();
-    formData.append("image", selectedFile);
-
-
     try {
-      const response = await axios.post(
-        "http://localhost:4000/upload-image?from=ct&to=meno",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Image uploaded successfully:", response.data);
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("from", localStorage.getItem("loggedInUserUsername"));
+      formData.append("to", localStorage.getItem("selectedUserUsername"));
+
+     await axios.post("http://localhost:4000/upload-image", formData, {
+       headers: {
+         "Content-Type": "multipart/form-data",
+       },
+     });
+
+      console.log("Image uploaded successfully.");
       window.location.reload();
     } catch (error) {
       console.error("Error uploading image:", error);

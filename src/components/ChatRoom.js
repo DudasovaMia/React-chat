@@ -6,24 +6,11 @@ import VideoUploader from "./VideoUploader";
 import Videos from "./Videos";
 import Images from "./Images";
 import UserDetails from "./UserDetails";
+import Voices from "./Voices";
 
 function MessageRoom() {
-  const [selectedUserUserId, setSelectedUserUserId] = useState("");
-  const [selectedUserUsername, setSelectedUserUsername] = useState("");
-  const [loggedInUserToken, setLoggedInUserToken] = useState("");
-  const [loggedInUserUserId, setLoggedInUserUserId] = useState("");
-  const [loggedInUserUsername, setLoggedInUserUsername] = useState("");
-
   const [mediaOpened, setMediaOpened] = useState(false);
   const [mediaType, setMediaType] = useState("videos");
-
-  useEffect(() => {
-    setSelectedUserUserId(localStorage.getItem("selectedUserUserId"));
-    setSelectedUserUsername(localStorage.getItem("selectedUserUsername"));
-    setLoggedInUserToken(localStorage.getItem("loggedInUserToken"));
-    setLoggedInUserUserId(localStorage.getItem("loggedInUserUserId"));
-    setLoggedInUserUsername(localStorage.getItem("loggedInUserUsername"));
-  }, []);
 
   return (
     <div className="flex">
@@ -51,14 +38,20 @@ function MessageRoom() {
                   </p>
                 </div>
               </div>
-              {mediaType === "images" ? (
+              {mediaType === "images" && (
                 <div className="flex flex-col">
                   <div className="flex py-2 border-b-1 border-gray-700">
                     <button
                       onClick={() => setMediaType("videos")}
-                      className="mx-5"
+                      className="ml-5"
                     >
                       Videos
+                    </button>
+                    <button
+                      onClick={() => setMediaType("voices")}
+                      className="mx-5"
+                    >
+                      Voices
                     </button>
                     <p className="px-2 py-1 border-0.5 border-gray-700 rounded-md">
                       Images
@@ -68,18 +61,46 @@ function MessageRoom() {
                     <Images />
                   </div>
                 </div>
-              ) : (
+              )}
+              {mediaType === "videos" && (
                 <div className="flex flex-col">
                   <div className="flex my-2">
                     <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
                       Videos
                     </p>
+                    <button
+                      onClick={() => setMediaType("voices")}
+                      className="mr-5"
+                    >
+                      Voices
+                    </button>
                     <button onClick={() => setMediaType("images")}>
                       Images
                     </button>
                   </div>
                   <div className="w-[95%] mx-auto">
                     <Videos />
+                  </div>
+                </div>
+              )}
+              {mediaType === "voices" && (
+                <div className="flex flex-col">
+                  <div className="flex my-2">
+                    <button
+                      onClick={() => setMediaType("videos")}
+                      className="ml-5"
+                    >
+                      Videos
+                    </button>
+                    <p className="mx-5 px-2 py-1 border-0.5 border-gray-700 rounded-md">
+                      Voices
+                    </p>
+                    <button onClick={() => setMediaType("images")}>
+                      Images
+                    </button>
+                  </div>
+                  <div className="w-[95%] mx-auto">
+                    <Voices />
                   </div>
                 </div>
               )}

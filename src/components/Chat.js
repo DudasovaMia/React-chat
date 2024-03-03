@@ -8,7 +8,7 @@ const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [username, setUsername] = useState(""); // State to hold the username
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     if (!localStorage.getItem("loggedInUserUsername")) {
@@ -17,10 +17,9 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    const newSocket = io("http://localhost:4000"); // Replace with your server URL
+    const newSocket = io("http://localhost:4000");
     setSocket(newSocket);
 
-    // Cleanup function to disconnect socket when component unmounts
     return () => {
       newSocket.disconnect();
     };
@@ -37,7 +36,6 @@ const Chat = () => {
       setMessages(history);
     });
 
-    // Cleanup function to remove event listeners when component unmounts
     return () => {
       socket.off("message");
       socket.off("messageHistory");
@@ -45,10 +43,9 @@ const Chat = () => {
   }, [socket]);
 
   useEffect(() => {
-    // Retrieve username from local storage
     const storedUsername = localStorage.getItem("loggedInUserUsername");
     setUsername(storedUsername);
-  }, []); // Run this effect only once when the component mounts
+  }, []);
 
   useEffect(() => {
     if (Notification.permission !== "granted") {
@@ -73,7 +70,6 @@ const Chat = () => {
       socket.emit("message", message);
       setInputMessage("");
 
-      // Display a notification for the sent message
       if (Notification.permission === "granted") {
         new Notification("Message Sent", {
           body: `Your message has been sent to ${selected}`,
@@ -104,7 +100,7 @@ const Chat = () => {
       <div className="flex w-[95%] justify-between mx-auto my-2">
         <ImageUploader />
         <VideoUploader />
-        <UploadVoice/>
+        <UploadVoice />
         <div className="flex w-[80%] justify-end">
           <input
             type="text"
@@ -113,7 +109,9 @@ const Chat = () => {
             placeholder="Type a message..."
             className="w-[80%]"
           />
-          <button onClick={sendMessage} className="ml-1">Send</button>
+          <button onClick={sendMessage} className="ml-1">
+            Send
+          </button>
         </div>
       </div>
     </div>
